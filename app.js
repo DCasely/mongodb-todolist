@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const _ = require('lodash');
 
 const app = express();
 
@@ -34,6 +35,16 @@ const item3 = new Item({
 
 const defaultItems = [item1, item2, item3];
 
+const listSchema = {
+  name: String,
+  items: [itemsSchema],
+};
+
+const List = mongoose.model('List', listSchema);
+
+// ================================================
+// HOME ROUTE
+// ================================================
 app.get('/', function (req, res) {
   Item.find({}, (err, foundItems) => {
     if (foundItems.length === 0) {
@@ -44,6 +55,35 @@ app.get('/', function (req, res) {
     }
 
     res.render('list', { listTitle: 'Today', newListItems: foundItems });
+  });
+});
+
+// ================================================
+// EXPRESS ROUTE PARAMETERS
+// ================================================
+app.get('/:customListName', (req, res) => {
+  const customListName = req.params.customListName;
+
+  List.findOne({ name: customListName }, (err, foundList) => {
+    if (!err) {
+      if (!foundList) {
+        // Create a new list
+        const list = new List({
+          name: customListName,
+          items: defaultItems,
+        });
+
+        list.save();
+
+        res.redirect(`/${customListName}`);
+      } else {
+        // Show an existing list
+        res.render('list', {
+          listTitle: foundList.name,
+          newListItems: foundList.items,
+        });
+      }
+    }
   });
 });
 
