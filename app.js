@@ -62,7 +62,7 @@ app.get('/', function (req, res) {
 // EXPRESS ROUTE PARAMETERS
 // ================================================
 app.get('/:customListName', (req, res) => {
-  const customListName = req.params.customListName;
+  const customListName = _.capitalize(req.params.customListName);
 
   List.findOne({ name: customListName }, (err, foundList) => {
     if (!err) {
@@ -113,12 +113,25 @@ app.post('/', function (req, res) {
 
 app.post('/delete', function (req, res) {
   const checkedItemId = req.body.checkbox;
+  const listName = req.body.listName;
 
-  Item.findByIdAndRemove(checkedItemId, (err) => {
-    err ? console.log(err) : console.log('Deleted Item Successfully');
+  if (listName === 'Today') {
+    Item.findByIdAndRemove(checkedItemId, (err) => {
+      err ? console.log(err) : console.log('Deleted Item Successfully');
 
-    res.redirect('/');
-  });
+      res.redirect('/');
+    });
+  } else {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedItemId } } },
+      (err, foundList) => {
+        if (!err) {
+          res.redirect(`/${listName}`);
+        }
+      }
+    );
+  }
 });
 
 app.get('/work', function (req, res) {
