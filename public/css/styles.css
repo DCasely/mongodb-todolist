@@ -21,6 +21,7 @@ h1 {
 #heading {
   background-color: #000;
   text-align: center;
+  text-transform: uppercase;
 }
 
 .item {
@@ -64,7 +65,6 @@ button {
   background-color: #000;
   color: #fff;
   font-size: 30px;
-  padding-bottom: 6px;
   border-width: 0;
 }
 
